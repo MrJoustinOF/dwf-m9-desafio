@@ -77,8 +77,6 @@ const ipnMercadoPago = async (req: NextApiRequest, res: NextApiResponse) => {
       });
 
       if (refStatus === "pending") {
-        console.log(refStatus);
-
         const { quantity } = aditional_info;
 
         const { objectID, stock }: any = await Product.findById(productId);
