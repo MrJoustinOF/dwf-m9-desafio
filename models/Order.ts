@@ -10,13 +10,7 @@ class Order {
   }
 
   static async updateById(id: string, data) {
-    const ref = collection.doc(id);
-
-    await ref.update(data);
-
-    const doc = (await ref.get()).data();
-
-    return doc;
+    await collection.doc(id).update(data);
   }
 
   static async findById(id: string) {
