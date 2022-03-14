@@ -71,18 +71,20 @@ const ipnMercadoPago = async (req: NextApiRequest, res: NextApiResponse) => {
         status: refStatus,
       } = (await Order.findById(refId)).data();
 
+      await Order.updateById(refId, {
+        status,
+        url: null,
+      });
+
       if (refStatus === "pending") {
+        console.log(refStatus);
+
         const { quantity } = aditional_info;
 
         const { objectID, stock }: any = await Product.findById(productId);
 
         await Product.updateStock(objectID, stock, quantity);
       }
-
-      await Order.updateById(refId, {
-        status,
-        url: null,
-      });
     } else {
       await Order.updateById(refId, { status });
     }
