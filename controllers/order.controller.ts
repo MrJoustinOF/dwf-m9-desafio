@@ -71,7 +71,6 @@ const ipnMercadoPago = async (req: NextApiRequest, res: NextApiResponse) => {
         status: refStatus,
         url,
       } = (await Order.findById(refId)).data();
-      console.log(refStatus, url);
 
       await Order.updateById(refId, {
         status,
