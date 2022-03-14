@@ -10,7 +10,7 @@ const createOrder = async (
 ) => {
   const { id: userId } = token;
   const { productId } = req.query;
-  const { quantity } = req.body;
+  const { quantity: bodyQuantity } = req.body;
 
   const { id: orderId } = await Order.createEmpty();
   const product: any = await Product.findById(productId as string);
@@ -20,8 +20,9 @@ const createOrder = async (
   }
 
   const { stock } = product;
+  const quantity = bodyQuantity || 1;
 
-  if (stock === 0) {
+  if (stock === 0 || quantity > stock) {
     res.json({ msg: "stock not available" });
   }
 
@@ -37,6 +38,7 @@ const createOrder = async (
     status: "pending",
     url,
     aditional_info: {
+      quantity,
       ...req.body,
     },
   };
@@ -62,10 +64,19 @@ const ipnMercadoPago = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const { order_status: status, external_reference: refId } = body;
 
-    if (status !== "paid") {
-      await Order.updateById(refId, { status });
+    if (status === "paid") {
+      const { productId, aditional_info } = await Order.updateById(refId, {
+        status,
+        url: null,
+      });
+
+      const { quantity } = aditional_info;
+
+      const { objectID, stock }: any = await Product.findById(productId);
+
+      await Product.updateStock(objectID, stock, quantity);
     } else {
-      await Order.updateById(refId, { status, url: null });
+      await Order.updateById(refId, { status });
     }
   }
 

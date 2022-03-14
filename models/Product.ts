@@ -20,6 +20,15 @@ class Product {
       return null;
     }
   }
+
+  static async updateStock(objectID, current, quantity) {
+    const stock = current - quantity;
+
+    await productsIndex.partialUpdateObject({
+      objectID,
+      stock,
+    });
+  }
 }
 
 export { Product };
