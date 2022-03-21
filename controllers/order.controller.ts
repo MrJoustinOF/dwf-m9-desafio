@@ -1,29 +1,25 @@
-import type { NextApiRequest, NextApiResponse } from "next";
 import { Order } from "models/Order";
 import { Product } from "models/Product";
 import { createPreference, getMerchantOrder } from "lib/mercadopago";
 
-const createOrder = async (
-  req: NextApiRequest,
-  res: NextApiResponse,
-  token
-) => {
+const createOrder = async (req, token) => {
   const { id: userId } = token;
-  const { productId } = req.query;
-  const { quantity: bodyQuantity } = req.body;
+  const { query, body } = req;
+  const { productId } = query;
+  const { quantity: bodyQuantity } = body;
 
   const { id: orderId } = await Order.createEmpty();
   const product: any = await Product.findById(productId as string);
 
   if (!product) {
-    res.json({ msg: "product not found" });
+    return { status: 404, response: { msg: "product not found" } };
   }
 
   const { stock } = product;
   const quantity = bodyQuantity || 1;
 
   if (stock === 0 || quantity > stock) {
-    res.json({ msg: "stock not available" });
+    return { status: 403, response: { msg: "stock not available" } };
   }
 
   const { init_point: url } = await createPreference({
@@ -39,25 +35,27 @@ const createOrder = async (
     url,
     aditional_info: {
       quantity,
-      ...req.body,
+      ...body,
     },
   };
 
   await Order.updateById(orderId, data);
 
-  res.json({ url, orderId, msg: "orderId is from db" });
+  return { status: 200, response: { url, orderId, msg: "orderId is from db" } };
 };
 
-const getOrderData = async (req: NextApiRequest, res: NextApiResponse) => {
-  const { orderId } = req.query;
+const getOrderData = async (orderId: string) => {
+  const order = (await Order.findById(orderId)).data();
 
-  const order = (await Order.findById(orderId as string)).data();
+  if (!order) {
+    return { status: 404, response: { msg: "order not found" } };
+  }
 
-  res.status(404).json(!order ? { msg: "not found" } : order);
+  return { status: 200, response: order };
 };
 
-const ipnMercadoPago = async (req: NextApiRequest, res: NextApiResponse) => {
-  const { id, topic } = req.query;
+const ipnMercadoPago = async (query) => {
+  const { id, topic } = query;
 
   if (topic === "merchant_order") {
     const { body } = await getMerchantOrder(id);
@@ -89,7 +87,7 @@ const ipnMercadoPago = async (req: NextApiRequest, res: NextApiResponse) => {
     }
   }
 
-  res.send("ok");
+  return "ok";
 };
 
 export { createOrder, getOrderData, ipnMercadoPago };

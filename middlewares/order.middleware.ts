@@ -1,4 +1,4 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import type { NextApiRequest } from "next";
 import * as yup from "yup";
 import { createOrder, getOrderData } from "controllers/order.controller";
 import { verifyBearer } from "lib/bearer-token";
@@ -11,32 +11,38 @@ const getOrderDataSchema = yup.object().shape({
   orderId: yup.string().required(),
 });
 
-const createOrderMiddleware = async (
-  req: NextApiRequest,
-  res: NextApiResponse
-) => {
-  const decodedToken = verifyBearer(req, res);
+const createOrderMiddleware = async (req: NextApiRequest) => {
+  const decodedToken: any = verifyBearer(req);
+
+  if (decodedToken.status && decodedToken.response) {
+    const { status, response } = decodedToken;
+
+    return { status, response };
+  }
 
   try {
     await createOrderSchema.validate(req.query);
-  } catch (e) {
-    res.status(400).json({ field: "query", message: e });
-  }
 
-  await createOrder(req, res, decodedToken);
+    const res = await createOrder(req, decodedToken);
+
+    return res;
+  } catch (e) {
+    return { status: 400, response: { field: "query", message: e } };
+  }
 };
 
-const getOrderDataMiddleware = async (
-  req: NextApiRequest,
-  res: NextApiResponse
-) => {
+const getOrderDataMiddleware = async (query) => {
   try {
-    await getOrderDataSchema.validate(req.query);
-  } catch (e) {
-    res.status(400).json({ field: "query", message: e });
-  }
+    await getOrderDataSchema.validate(query);
 
-  await getOrderData(req, res);
+    const { orderId } = query;
+
+    const res = await getOrderData(orderId);
+
+    return res;
+  } catch (e) {
+    return { status: 400, response: { field: "query", message: e } };
+  }
 };
 
 export { createOrderMiddleware, getOrderDataMiddleware };

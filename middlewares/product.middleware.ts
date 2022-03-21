@@ -1,6 +1,6 @@
-import type { NextApiRequest, NextApiResponse } from "next";
 import * as yup from "yup";
 import { searchProducts, getProductData } from "controllers/product.controller";
+import { getLimitAndOffset } from "lib/getLimitAndOffset";
 
 const searchProductsSchema = yup.object().shape({
   q: yup.string().required(),
@@ -12,38 +12,31 @@ const getProductDataSchema = yup.object().shape({
   id: yup.number().required(),
 });
 
-const searchProductsMiddleware = async (
-  req: NextApiRequest,
-  res: NextApiResponse
-) => {
+const searchProductsMiddleware = async (query) => {
   try {
-    await searchProductsSchema.validate(req.query);
+    await searchProductsSchema.validate(query);
+
+    const options = getLimitAndOffset(query);
+
+    const res = await searchProducts(options);
+
+    return res;
   } catch (e) {
-    res.status(400).json({ field: "query", message: e });
+    return { status: 400, response: { field: "query", message: e } };
   }
-
-  const { q: query } = req.query;
-  const offset = parseInt(req.query.offset as string);
-  const queryLimit = parseInt(req.query.limit as string);
-
-  const limit = queryLimit <= 100 ? queryLimit : 100;
-
-  const options = { query, offset, limit };
-
-  await searchProducts(req, res, options);
 };
 
-const getProductDataMiddleware = async (
-  req: NextApiRequest,
-  res: NextApiResponse
-) => {
+const getProductDataMiddleware = async (query) => {
   try {
-    await getProductDataSchema.validate(req.query);
-  } catch (e) {
-    res.status(400).json({ field: "query", message: e });
-  }
+    await getProductDataSchema.validate(query);
 
-  await getProductData(req, res);
+    const { id } = query;
+    const res = await getProductData(id);
+
+    return res;
+  } catch (e) {
+    return { status: 400, response: { field: "query", message: e } };
+  }
 };
 
 export { searchProductsMiddleware, getProductDataMiddleware };

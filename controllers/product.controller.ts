@@ -1,11 +1,6 @@
-import type { NextApiRequest, NextApiResponse } from "next";
 import { Product } from "models/Product";
 
-const searchProducts = async (
-  req: NextApiRequest,
-  res: NextApiResponse,
-  options
-) => {
+const searchProducts = async (options) => {
   const { query, offset, limit } = options;
   const filters = "stock > 0";
 
@@ -21,15 +16,13 @@ const searchProducts = async (
     total,
   };
 
-  res.json({ hits, pagination });
+  return { status: 200, response: { hits, pagination } };
 };
 
-const getProductData = async (req: NextApiRequest, res: NextApiResponse) => {
-  const { id } = req.query;
+const getProductData = async (id: string) => {
+  const product = await Product.findById(id);
 
-  const product = await Product.findById(id as string);
-
-  res.send(product);
+  return { status: 200, response: product };
 };
 
 export { searchProducts, getProductData };

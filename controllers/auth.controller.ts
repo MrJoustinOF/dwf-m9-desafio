@@ -1,4 +1,3 @@
-import type { NextApiRequest, NextApiResponse } from "next";
 import gen from "random-seed";
 import addMinutes from "date-fns/addMinutes";
 import isAfter from "date-fns/isAfter";
@@ -7,8 +6,8 @@ import { User } from "models/User";
 import { genJwt } from "lib/jwt";
 import { sendEmailCode } from "lib/sendgrid";
 
-const getCode = async (req: NextApiRequest, res: NextApiResponse) => {
-  const { email: userEmail } = req.body;
+const getCode = async (body) => {
+  const { email: userEmail } = body;
   const email: string = userEmail.trim().toLowerCase();
 
   const ref = await Auth.find(email);
@@ -40,11 +39,11 @@ const getCode = async (req: NextApiRequest, res: NextApiResponse) => {
 
   await sendEmailCode(email, code);
 
-  res.json({ msg: "email has been sent" });
+  return { status: 200, response: { msg: "email has been sent" } };
 };
 
-const getToken = async (req: NextApiRequest, res: NextApiResponse) => {
-  const { email: userEmail, code } = req.body;
+const getToken = async (body) => {
+  const { email: userEmail, code } = body;
   const email = userEmail.trim().toLowerCase();
 
   const ref = await Auth.find(email);
@@ -55,15 +54,15 @@ const getToken = async (req: NextApiRequest, res: NextApiResponse) => {
     const now = new Date();
 
     if (isAfter(now, expireDate)) {
-      res.status(400).json({ msg: "code expired" });
+      return { status: 400, response: { msg: "code expired" } };
     }
 
     if (!refCode) {
-      res.status(400).json({ msg: "code already used" });
+      return { status: 400, response: { msg: "code already used" } };
     }
 
     if (parseInt(refCode) !== parseInt(code)) {
-      res.status(403).json({ msg: "wrong code" });
+      return { status: 403, response: { msg: "wrong code" } };
     }
 
     const { id: authId } = ref;
@@ -71,9 +70,9 @@ const getToken = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const token = genJwt({ id });
 
-    res.json({ token });
+    return { status: 200, response: { token } };
   } else {
-    res.status(400).json({ msg: "email not found" });
+    return { status: 400, response: { msg: "email not found" } };
   }
 };
 

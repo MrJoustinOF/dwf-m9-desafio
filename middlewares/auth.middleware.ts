@@ -1,6 +1,4 @@
-import { NextApiRequest, NextApiResponse } from "next";
 import * as yup from "yup";
-import { getCode, getToken } from "controllers/auth.controller";
 
 const getCodeSchema = yup.object().shape({
   email: yup.string().email().required(),
@@ -11,30 +9,22 @@ const getTokenSchema = yup.object().shape({
   code: yup.number().required(),
 });
 
-const getCodeAuthMiddleware = async (
-  req: NextApiRequest,
-  res: NextApiResponse
-) => {
+const useAuthMiddleware = async (schema, data, cb) => {
   try {
-    await getCodeSchema.validate(req.body);
-  } catch (e) {
-    res.status(400).json({ field: "body", message: e });
-  }
+    await schema.validate(data);
 
-  await getCode(req, res);
+    const res = await cb(data);
+
+    return res;
+  } catch (e) {
+    return { status: 400, response: { field: "body", message: e } };
+  }
 };
 
-const getTokenMiddleware = async (
-  req: NextApiRequest,
-  res: NextApiResponse
-) => {
-  try {
-    await getTokenSchema.validate(req.body);
-  } catch (e) {
-    res.status(400).json({ field: "body", message: e });
-  }
+const getCodeMiddleware = async (body, cb) =>
+  await useAuthMiddleware(getCodeSchema, body, cb);
 
-  await getToken(req, res);
-};
+const getTokenMiddleware = async (body, cb) =>
+  await useAuthMiddleware(getTokenSchema, body, cb);
 
-export { getCodeAuthMiddleware, getTokenMiddleware };
+export { getCodeMiddleware, getTokenMiddleware };

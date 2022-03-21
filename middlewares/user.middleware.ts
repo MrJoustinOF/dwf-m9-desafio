@@ -1,4 +1,4 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+import type { NextApiRequest } from "next";
 import * as yup from "yup";
 import {
   getMyData,
@@ -24,44 +24,47 @@ const updateMyAddressSchema = yup
   .noUnknown(true)
   .strict();
 
-const getMyDataMiddleware = async (
-  req: NextApiRequest,
-  res: NextApiResponse
-) => {
-  const decodedToken = verifyBearer(req, res);
+const getMyDataMiddleware = async (req: NextApiRequest) => {
+  const decodedToken: any = verifyBearer(req);
 
-  await getMyData(req, res, decodedToken);
-};
+  if (decodedToken.status && decodedToken.response) {
+    const { status, response } = decodedToken;
 
-const updateMyDataMiddleware = async (
-  req: NextApiRequest,
-  res: NextApiResponse
-) => {
-  const decodedToken = verifyBearer(req, res);
-
-  try {
-    await updateMyDataSchema.validate(req.body);
-  } catch (e) {
-    res.status(400).json({ field: "body", message: e });
+    return { status, response };
   }
 
-  await updateMyData(req, res, decodedToken);
+  const res = await getMyData(decodedToken);
+
+  return res;
 };
 
-const updateMyAddressMiddleware = async (
-  req: NextApiRequest,
-  res: NextApiResponse
-) => {
-  const decodedToken = verifyBearer(req, res);
+const useUserMiddleware = async (schema, req: NextApiRequest, cb) => {
+  const decodedToken: any = verifyBearer(req);
 
-  try {
-    await updateMyAddressSchema.validate(req.body);
-  } catch (e) {
-    res.status(400).json({ field: "body", message: e });
+  if (decodedToken.status && decodedToken.response) {
+    const { status, response } = decodedToken;
+
+    return { status, response };
   }
 
-  await updateMyAddress(req, res, decodedToken);
+  try {
+    const { body } = req;
+
+    await schema.validate(body);
+
+    const res = await cb(body, decodedToken);
+
+    return res;
+  } catch (e) {
+    return { status: 400, response: { field: "body", message: e } };
+  }
 };
+
+const updateMyDataMiddleware = async (req: NextApiRequest) =>
+  useUserMiddleware(updateMyDataSchema, req, updateMyData);
+
+const updateMyAddressMiddleware = async (req: NextApiRequest) =>
+  useUserMiddleware(updateMyAddressSchema, req, updateMyAddress);
 
 export {
   getMyDataMiddleware,

@@ -1,21 +1,16 @@
-import type { NextApiRequest, NextApiResponse } from "next";
 import { User } from "models/User";
 
-const getMyData = async (req: NextApiRequest, res: NextApiResponse, token) => {
+const getMyData = async (token) => {
   const { id } = token;
 
   const ref = await User.find(id);
   const data = ref.data();
 
-  res.json(data);
+  return { status: 200, response: data };
 };
 
-const updateMyData = async (
-  req: NextApiRequest,
-  res: NextApiResponse,
-  token
-) => {
-  const { name, lastname } = req.body;
+const updateMyData = async (body, token) => {
+  const { name, lastname } = body;
   const { id } = token;
 
   const ref = await User.find(id);
@@ -26,15 +21,11 @@ const updateMyData = async (
     lastname: !lastname ? dataLastName : lastname,
   });
 
-  res.json({ msg: "data updated" });
+  return { status: 200, response: { msg: "data updated" } };
 };
 
-const updateMyAddress = async (
-  req: NextApiRequest,
-  res: NextApiResponse,
-  token
-) => {
-  const { address } = req.body;
+const updateMyAddress = async (body, token) => {
+  const { address } = body;
   const { id } = token;
 
   const ref = await User.find(id);
@@ -44,7 +35,7 @@ const updateMyAddress = async (
     address: !address ? dataAddress : address,
   });
 
-  res.json({ msg: "address updated" });
+  return { status: 200, response: { msg: "address updated" } };
 };
 
 export { getMyData, updateMyData, updateMyAddress };
