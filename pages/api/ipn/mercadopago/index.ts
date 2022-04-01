@@ -2,9 +2,9 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { ipnMercadoPago } from "controllers/order.controller";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  const { query } = req;
+  const { id, topic } = req.query;
 
-  const msg = await ipnMercadoPago(query);
+  const msg = await ipnMercadoPago(id, topic);
 
   res.send(msg);
 };

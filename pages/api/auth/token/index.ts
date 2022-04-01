@@ -1,15 +1,18 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import methods from "micro-method-router";
-import { getTokenMiddleware } from "middlewares/auth.middleware";
+import { validateSchema } from "utils/middlewares";
+import { getTokenSchema } from "utils/schemas";
 import { getToken } from "controllers/auth.controller";
 
-const post = async (req: NextApiRequest, res: NextApiResponse) => {
-  const { body } = req;
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+  const { email, code } = req.body;
 
-  const { status, response } = await getTokenMiddleware(body, getToken);
+  const data = await getToken(email, code);
 
-  res.status(status).json(response);
+  res.json(data);
 };
+
+const post = validateSchema(handler, getTokenSchema);
 
 export default methods({
   post,

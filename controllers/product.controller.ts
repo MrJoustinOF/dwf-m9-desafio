@@ -16,13 +16,13 @@ const searchProducts = async (options) => {
     total,
   };
 
-  return { status: 200, response: { hits, pagination } };
+  return { hits, pagination };
 };
 
 const getProductData = async (id: string) => {
   const product = await Product.findById(id);
 
-  return { status: 200, response: product };
+  return product;
 };
 
 export { searchProducts, getProductData };

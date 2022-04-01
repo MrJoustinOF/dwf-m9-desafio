@@ -1,14 +1,18 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import methods from "micro-method-router";
-import { getProductDataMiddleware } from "middlewares/product.middleware";
+import { validateSchema } from "utils/middlewares";
+import { getProductDataSchema } from "utils/schemas";
+import { getProductData } from "controllers/product.controller";
 
-const get = async (req: NextApiRequest, res: NextApiResponse) => {
-  const { query } = req;
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+  const { id } = req.query;
 
-  const { status, response } = await getProductDataMiddleware(query);
+  const data = await getProductData(id as string);
 
-  res.status(status).json(response);
+  res.json(data);
 };
+
+const get = validateSchema(handler, getProductDataSchema);
 
 export default methods({
   get,

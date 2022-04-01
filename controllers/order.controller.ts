@@ -2,24 +2,21 @@ import { Order } from "models/Order";
 import { Product } from "models/Product";
 import { createPreference, getMerchantOrder } from "lib/mercadopago";
 
-const createOrder = async (req, token) => {
-  const { id: userId } = token;
-  const { query, body } = req;
-  const { productId } = query;
-  const { quantity: bodyQuantity } = body;
+const createOrder = async (userId: string, productId: string, info) => {
+  const { quantity: bodyQuantity } = info;
 
   const { id: orderId } = await Order.createEmpty();
-  const product: any = await Product.findById(productId as string);
+  const product: any = await Product.findById(productId);
 
   if (!product) {
-    return { status: 404, response: { msg: "product not found" } };
+    return { msg: "product not found" };
   }
 
   const { stock } = product;
   const quantity = bodyQuantity || 1;
 
   if (stock === 0 || quantity > stock) {
-    return { status: 403, response: { msg: "stock not available" } };
+    return { msg: "stock not available" };
   }
 
   const { init_point: url } = await createPreference({
@@ -35,28 +32,26 @@ const createOrder = async (req, token) => {
     url,
     aditional_info: {
       quantity,
-      ...body,
+      ...info,
     },
   };
 
   await Order.updateById(orderId, data);
 
-  return { status: 200, response: { url, orderId, msg: "orderId is from db" } };
+  return { url, orderId, msg: "orderId is from db" };
 };
 
 const getOrderData = async (orderId: string) => {
   const order = (await Order.findById(orderId)).data();
 
   if (!order) {
-    return { status: 404, response: { msg: "order not found" } };
+    return { msg: "order not found" };
   }
 
-  return { status: 200, response: order };
+  return order;
 };
 
-const ipnMercadoPago = async (query) => {
-  const { id, topic } = query;
-
+const ipnMercadoPago = async (id, topic) => {
   if (topic === "merchant_order") {
     const { body } = await getMerchantOrder(id);
 

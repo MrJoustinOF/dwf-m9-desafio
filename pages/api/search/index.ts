@@ -1,14 +1,21 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import methods from "micro-method-router";
-import { searchProductsMiddleware } from "middlewares/product.middleware";
+import { validateSchema } from "utils/middlewares";
+import { searchProductsSchema } from "utils/schemas";
+import { getLimitAndOffset } from "lib/getLimitAndOffset";
+import { searchProducts } from "controllers/product.controller";
 
-const get = async (req: NextApiRequest, res: NextApiResponse) => {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { query } = req;
 
-  const { status, response } = await searchProductsMiddleware(query);
+  const options = getLimitAndOffset(query);
 
-  res.status(status).json(response);
+  const data = await searchProducts(options);
+
+  res.json(data);
 };
+
+const get = validateSchema(handler, searchProductsSchema);
 
 export default methods({
   get,

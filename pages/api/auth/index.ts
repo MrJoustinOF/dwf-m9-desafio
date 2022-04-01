@@ -1,15 +1,18 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import methods from "micro-method-router";
-import { getCodeMiddleware } from "middlewares/auth.middleware";
+import { validateSchema } from "utils/middlewares";
+import { getCodeSchema } from "utils/schemas";
 import { getCode } from "controllers/auth.controller";
 
-const post = async (req: NextApiRequest, res: NextApiResponse) => {
-  const { body } = req;
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+  const { email } = req.body;
 
-  const { status, response } = await getCodeMiddleware(body, getCode);
+  const data = await getCode(email);
 
-  res.status(status).json(response);
+  res.json(data);
 };
+
+const post = validateSchema(handler, getCodeSchema);
 
 export default methods({
   post,

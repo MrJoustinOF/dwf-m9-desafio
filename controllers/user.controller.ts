@@ -1,17 +1,14 @@
 import { User } from "models/User";
 
-const getMyData = async (token) => {
-  const { id } = token;
-
+const getMyData = async (id) => {
   const ref = await User.find(id);
   const data = ref.data();
 
-  return { status: 200, response: data };
+  return data;
 };
 
-const updateMyData = async (body, token) => {
-  const { name, lastname } = body;
-  const { id } = token;
+const updateMyData = async (data, id) => {
+  const { name, lastname } = data;
 
   const ref = await User.find(id);
   const { name: dataName, lastname: dataLastName } = ref.data();
@@ -21,13 +18,10 @@ const updateMyData = async (body, token) => {
     lastname: !lastname ? dataLastName : lastname,
   });
 
-  return { status: 200, response: { msg: "data updated" } };
+  return { msg: "data updated" };
 };
 
-const updateMyAddress = async (body, token) => {
-  const { address } = body;
-  const { id } = token;
-
+const updateMyAddress = async (address, id) => {
   const ref = await User.find(id);
   const { address: dataAddress } = ref.data();
 
@@ -35,7 +29,7 @@ const updateMyAddress = async (body, token) => {
     address: !address ? dataAddress : address,
   });
 
-  return { status: 200, response: { msg: "address updated" } };
+  return { msg: "address updated" };
 };
 
 export { getMyData, updateMyData, updateMyAddress };

@@ -1,12 +1,19 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import methods from "micro-method-router";
-import { updateMyAddressMiddleware } from "middlewares/user.middleware";
+import { validateSchema, authMiddleware } from "utils/middlewares";
+import { updateMyAddressSchema } from "utils/schemas";
+import { updateMyAddress } from "controllers/user.controller";
 
-const patch = async (req: NextApiRequest, res: NextApiResponse) => {
-  const { status, response } = await updateMyAddressMiddleware(req);
+const handler = async (req: NextApiRequest, res: NextApiResponse, token) => {
+  const { id } = token;
+  const { address } = req.body;
 
-  res.status(status).json(response);
+  const data = await updateMyAddress(address, id);
+
+  res.json(data);
 };
+
+const patch = validateSchema(authMiddleware(handler), updateMyAddressSchema);
 
 export default methods({
   patch,

@@ -6,9 +6,8 @@ import { User } from "models/User";
 import { genJwt } from "lib/jwt";
 import { sendEmailCode } from "lib/sendgrid";
 
-const getCode = async (body) => {
-  const { email: userEmail } = body;
-  const email: string = userEmail.trim().toLowerCase();
+const getCode = async (userEmail: string) => {
+  const email = userEmail.trim().toLowerCase();
 
   const ref = await Auth.find(email);
 
@@ -39,11 +38,10 @@ const getCode = async (body) => {
 
   await sendEmailCode(email, code);
 
-  return { status: 200, response: { msg: "email has been sent" } };
+  return { msg: "email has been sent" };
 };
 
-const getToken = async (body) => {
-  const { email: userEmail, code } = body;
+const getToken = async (userEmail, code) => {
   const email = userEmail.trim().toLowerCase();
 
   const ref = await Auth.find(email);
@@ -54,15 +52,15 @@ const getToken = async (body) => {
     const now = new Date();
 
     if (isAfter(now, expireDate)) {
-      return { status: 400, response: { msg: "code expired" } };
+      return { error: 400, msg: "code expired" };
     }
 
     if (!refCode) {
-      return { status: 400, response: { msg: "code already used" } };
+      return { error: 400, msg: "code already used" };
     }
 
     if (parseInt(refCode) !== parseInt(code)) {
-      return { status: 403, response: { msg: "wrong code" } };
+      return { error: 403, msg: "wrong code" };
     }
 
     const { id: authId } = ref;
@@ -70,9 +68,9 @@ const getToken = async (body) => {
 
     const token = genJwt({ id });
 
-    return { status: 200, response: { token } };
+    return { token };
   } else {
-    return { status: 400, response: { msg: "email not found" } };
+    return { msg: "email not found" };
   }
 };
 
