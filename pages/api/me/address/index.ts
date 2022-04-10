@@ -8,9 +8,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse, token) => {
   const { id } = token;
   const { address } = req.body;
 
-  const data = await updateMyAddress(address, id);
+  const { msg } = await updateMyAddress(address, id);
 
-  res.json(data);
+  res.json({ msg });
 };
 
 const patch = validateSchema(authMiddleware(handler), updateMyAddressSchema);

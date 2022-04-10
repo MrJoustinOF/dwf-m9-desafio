@@ -41,7 +41,7 @@ const getCode = async (userEmail: string) => {
   return { msg: "email has been sent" };
 };
 
-const getToken = async (userEmail, code) => {
+const getToken = async (userEmail: string, code: string) => {
   const email = userEmail.trim().toLowerCase();
 
   const ref = await Auth.find(email);

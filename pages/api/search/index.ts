@@ -10,9 +10,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
   const options = getLimitAndOffset(query);
 
-  const data = await searchProducts(options);
+  const { hits, pagination } = await searchProducts(options);
 
-  res.json(data);
+  res.json({ hits, pagination });
 };
 
 const get = validateSchema(handler, searchProductsSchema);

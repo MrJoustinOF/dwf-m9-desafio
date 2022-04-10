@@ -9,9 +9,19 @@ const handler = async (req: NextApiRequest, res: NextApiResponse, token) => {
   const { productId } = req.query;
   const { body } = req;
 
-  const data = await createOrder(userId, productId as string, { ...body });
+  const { error, url, orderId, msg } = await createOrder(
+    userId,
+    productId as string,
+    {
+      ...body,
+    }
+  );
 
-  res.json(data);
+  if (error) {
+    res.status(error).json({ msg });
+  }
+
+  res.json({ url, orderId, msg });
 };
 
 const post = validateSchema(authMiddleware(handler), createOrderSchema);

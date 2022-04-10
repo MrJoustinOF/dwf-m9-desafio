@@ -1,4 +1,6 @@
-const getLimitAndOffset = (reqQuery) => {
+const getLimitAndOffset = (
+  reqQuery
+): { query: string; offset: number; limit: number } => {
   const { q: query, offset: queryOffset, limit: queryLimit } = reqQuery;
 
   const offset = parseInt(queryOffset as string);

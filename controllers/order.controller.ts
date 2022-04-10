@@ -9,14 +9,14 @@ const createOrder = async (userId: string, productId: string, info) => {
   const product: any = await Product.findById(productId);
 
   if (!product) {
-    return { msg: "product not found" };
+    return { error: 404, msg: "product not found" };
   }
 
   const { stock } = product;
   const quantity = bodyQuantity || 1;
 
   if (stock === 0 || quantity > stock) {
-    return { msg: "stock not available" };
+    return { error: 400, msg: "stock not available" };
   }
 
   const { init_point: url } = await createPreference({
@@ -45,7 +45,7 @@ const getOrderData = async (orderId: string) => {
   const order = (await Order.findById(orderId)).data();
 
   if (!order) {
-    return { msg: "order not found" };
+    return { error: 404, msg: "order not found" };
   }
 
   return order;

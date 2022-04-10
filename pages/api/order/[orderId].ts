@@ -9,7 +9,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
   const data = await getOrderData(orderId as string);
 
-  res.json(data)
+  if (data.error) {
+    const { error, msg } = data;
+
+    res.status(error).json({ msg });
+  }
+
+  res.json(data);
 };
 
 const get = validateSchema(handler, getOrderDataSchema);

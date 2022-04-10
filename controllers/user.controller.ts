@@ -1,13 +1,13 @@
 import { User } from "models/User";
 
-const getMyData = async (id) => {
+const getMyData = async (id: string) => {
   const ref = await User.find(id);
   const data = ref.data();
 
   return data;
 };
 
-const updateMyData = async (data, id) => {
+const updateMyData = async (data: any, id: string) => {
   const { name, lastname } = data;
 
   const ref = await User.find(id);
@@ -21,7 +21,7 @@ const updateMyData = async (data, id) => {
   return { msg: "data updated" };
 };
 
-const updateMyAddress = async (address, id) => {
+const updateMyAddress = async (address: any, id: string) => {
   const ref = await User.find(id);
   const { address: dataAddress } = ref.data();
 

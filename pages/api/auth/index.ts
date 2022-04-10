@@ -7,9 +7,9 @@ import { getCode } from "controllers/auth.controller";
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { email } = req.body;
 
-  const data = await getCode(email);
+  const { msg } = await getCode(email);
 
-  res.json(data);
+  res.json({ msg });
 };
 
 const post = validateSchema(handler, getCodeSchema);

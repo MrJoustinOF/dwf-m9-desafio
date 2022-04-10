@@ -1,3 +1,4 @@
+import Cors from "cors";
 import type { NextApiRequest, NextApiResponse } from "next";
 import parseToken from "parse-bearer-token";
 import { verifyJwt } from "lib/jwt";
@@ -20,6 +21,23 @@ const authMiddleware = (cb) => {
   };
 };
 
+const cors = Cors({
+  methods: ["GET", "POST", "PATCH"],
+});
+
+const corsMiddleware = (cb) => {
+  return (req: NextApiRequest, res: NextApiResponse) => {
+    return new Promise((resolve, reject) => {
+      cors(req, res, (result) => {
+        if (result instanceof Error) return reject(result);
+        cb(req, res);
+
+        return resolve(result);
+      });
+    });
+  };
+};
+
 const validateSchema = (cb, schema) => {
   return async (req: NextApiRequest, res: NextApiResponse) => {
     try {
@@ -32,4 +50,4 @@ const validateSchema = (cb, schema) => {
   };
 };
 
-export { authMiddleware, validateSchema };
+export { authMiddleware, corsMiddleware, validateSchema };

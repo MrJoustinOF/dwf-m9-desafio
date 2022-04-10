@@ -20,9 +20,9 @@ const patchHandler = async (
   const { name, lastname } = req.body;
   const { id } = token;
 
-  const data = await updateMyData({ name, lastname }, id);
+  const { msg } = await updateMyData({ name, lastname }, id);
 
-  res.json(data);
+  res.json({ msg });
 };
 
 const get = authMiddleware(getHandler);
