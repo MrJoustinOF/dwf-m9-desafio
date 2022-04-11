@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import methods from "micro-method-router";
-import { validateSchema } from "utils/middlewares";
+import { corsMiddleware, validateSchema } from "utils/middlewares";
 import { searchProductsSchema } from "utils/schemas";
 import { getLimitAndOffset } from "lib/getLimitAndOffset";
 import { searchProducts } from "controllers/product.controller";
@@ -17,6 +17,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
 const get = validateSchema(handler, searchProductsSchema);
 
-export default methods({
-  get,
-});
+export default corsMiddleware(
+  methods({
+    get,
+  })
+);

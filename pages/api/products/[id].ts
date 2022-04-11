@@ -9,17 +9,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
   const data = await getProductData(id as string);
 
+  if (!data) {
+    res.status(404).json({ msg: "product not found" });
+  }
+
   res.json(data);
 };
 
 const get = validateSchema(handler, getProductDataSchema);
 
-export default methods({
-  get,
-});
-
-// export default corsMiddleware(
-//   methods({
-//     get,
-//   })
-// );
+export default corsMiddleware(
+  methods({
+    get,
+  })
+);

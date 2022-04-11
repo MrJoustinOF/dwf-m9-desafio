@@ -1,6 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import methods from "micro-method-router";
-import { authMiddleware, validateSchema } from "utils/middlewares";
+import {
+  authMiddleware,
+  corsMiddleware,
+  validateSchema,
+} from "utils/middlewares";
 import { createOrderSchema } from "utils/schemas";
 import { createOrder } from "controllers/order.controller";
 
@@ -26,6 +30,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse, token) => {
 
 const post = validateSchema(authMiddleware(handler), createOrderSchema);
 
-export default methods({
-  post,
-});
+export default corsMiddleware(
+  methods({
+    post,
+  })
+);
