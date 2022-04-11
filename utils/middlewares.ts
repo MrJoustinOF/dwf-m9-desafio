@@ -31,7 +31,6 @@ const corsMiddleware = (cb) => {
       cors(req, res, (result) => {
         if (result instanceof Error) return reject(result);
         cb(req, res);
-
         return resolve(result);
       });
     });
