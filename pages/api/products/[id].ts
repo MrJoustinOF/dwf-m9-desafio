@@ -14,6 +14,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
 const get = validateSchema(handler, getProductDataSchema);
 
+// export default methods({
+//   get,
+// });
+
 export default corsMiddleware(
   methods({
     get,

@@ -21,19 +21,27 @@ const authMiddleware = (cb) => {
   };
 };
 
+const runMiddleware = (req, res, cb) => {
+  return new Promise((resolve, reject) => {
+    cb(req, res, (result) => {
+      if (result instanceof Error) {
+        return reject(result);
+      }
+
+      return resolve(result);
+    });
+  });
+};
+
 const cors = Cors({
   methods: ["GET", "POST", "PATCH"],
 });
 
 const corsMiddleware = (cb) => {
-  return (req: NextApiRequest, res: NextApiResponse) => {
-    return new Promise((resolve, reject) => {
-      cors(req, res, (result) => {
-        if (result instanceof Error) return reject(result);
-        cb(req, res);
-        return resolve(result);
-      });
-    });
+  return async (req: NextApiRequest, res: NextApiResponse) => {
+    await runMiddleware(req, res, cors);
+
+    await cb(req, res);
   };
 };
 
@@ -49,4 +57,4 @@ const validateSchema = (cb, schema) => {
   };
 };
 
-export { authMiddleware, corsMiddleware, validateSchema };
+export { authMiddleware, validateSchema, corsMiddleware };
