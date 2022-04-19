@@ -7,13 +7,14 @@ import { getToken } from "controllers/auth.controller";
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { email, code } = req.body;
 
-  const { error, msg } = await getToken(email, code);
+  const { error, msg, token } = await getToken(email, code);
 
   if (error) {
+    console.log("error");
     res.status(error).json({ msg });
   }
 
-  res.json({ msg });
+  res.json({ token });
 };
 
 const post = validateSchema(handler, getTokenSchema);
