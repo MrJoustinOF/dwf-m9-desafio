@@ -24,7 +24,12 @@ const getCode = async (userEmail: string) => {
   } else {
     const name = email.slice(0, email.indexOf("@"));
     const lastname = "";
-    const address = {};
+    const address = {
+      street: "",
+      avenue: "",
+      country: "",
+      city: "",
+    };
 
     const userId = await User.createAuthRef({ name, lastname, address });
 
