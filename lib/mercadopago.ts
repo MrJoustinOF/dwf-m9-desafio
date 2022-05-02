@@ -7,11 +7,14 @@ mercadopago.configure({ access_token });
 const createPreference = async (data) => {
   const { product, quantity, orderId: external_reference } = data;
 
-  const { title, desc: description, price: unit_price } = product;
+  const { objectID, title, desc: description, price: unit_price } = product;
 
-  const { BASE_URL } = process.env;
+  const { BASE_URL, CLIENT_URL } = process.env;
 
-  const success = BASE_URL + "/api/ipn/success";
+  const success = CLIENT_URL + "/thanks?id=" + external_reference;
+  const pending = CLIENT_URL + "/item/" + objectID;
+  const failure = CLIENT_URL + "/item/" + objectID;
+
   const notification_url = BASE_URL + "/api/ipn/mercadopago";
 
   const { response } = await mercadopago.preferences.create({
@@ -28,6 +31,8 @@ const createPreference = async (data) => {
     ],
     back_urls: {
       success,
+      pending,
+      failure,
     },
     external_reference,
     notification_url,
